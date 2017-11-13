@@ -132,10 +132,11 @@ class UserController extends Controller
         {
             DB::rollback();
             return response('User from don\'t have enough money for transferring', 422);
-        } else {
-            // Else commit the queries
+        } 
+        else 
+        {
             DB::commit();
-            return response('', 200);
+            return response('200 OK', 200);
         }
     }    
 }
