@@ -61,4 +61,31 @@ class UserController extends Controller
         }        
     }
     
+    
+        /**
+     *  Withdraw money from user id.
+     *
+     * @param  int  $id int $amount
+     * @return Response
+     */
+    public function withdrawMoney(Request $request)
+    {
+      
+        $validator = Validator::make($request->all(), [
+            'user' => 'required|integer',
+            'amount' => 'required|numeric'
+        ]);
+
+        if ($validator->fails()) 
+        {
+            return response($validator->errors(), 422);
+        }
+        
+        if (User::where(['id' => $request->input('user')])
+            ->decrement('balance', $request->input('amount')))
+        {
+            return response('', 200);
+        }
+    }
+    
 }
