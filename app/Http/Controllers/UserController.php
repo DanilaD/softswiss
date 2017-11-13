@@ -98,4 +98,44 @@ class UserController extends Controller
         return response('422 user don\'t have enough money', 422);
         
     }
+    
+    
+    /**
+     *  Transfer money from user id to anothe user id.
+     *
+     * @param  int $from int $to float $amount
+     * @return Response
+     */
+    public function transferMoney(Request $request)
+    {
+      
+        $validator = Validator::make($request->all(), [
+            'from' => 'required|integer|exists:users,id',
+            'to' => 'required|integer|exists:users,id',
+            'amount' => 'required|numeric'
+        ]);
+
+        if ($validator->fails()) 
+        {
+            return response($validator->errors(), 422);
+        }
+        
+        DB::beginTransaction();
+        
+        $from = User::where([['id', $request->input('from')],[ 'balance', '>=', $request->input('amount')]])
+          ->decrement('balance', $request->input('amount'));
+
+        $to = User::where(['id' => $request->input('to')])
+          ->increment('balance', $request->input('amount'));
+        
+        if( !$from || !$to )
+        {
+            DB::rollback();
+            return response('User from don\'t have enough money for transferring', 422);
+        } else {
+            // Else commit the queries
+            DB::commit();
+            return response('', 200);
+        }
+    }    
 }
