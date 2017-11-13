@@ -46,7 +46,7 @@ class UserController extends Controller
     {
       
         $validator = Validator::make($request->all(), [
-            'user' => 'required|integer|exists:users,id',
+            'user' => 'required|integer',
             'amount' => 'required|numeric'
         ]);
 
@@ -62,7 +62,40 @@ class UserController extends Controller
         {
             return response('200 OK', 200);
         }
-        return response('422 Problem to create row', 422);
+        return response('422 Problem adding money', 422);
 
-    }    
+    }
+
+    
+    /**
+     *  Withdraw money from user id.
+     *
+     * @param  int  $id float $amount
+     * @return Response
+     */
+    public function withdrawMoney(Request $request)
+    {      
+        $validator = Validator::make($request->all(), [
+            'user' => 'required|integer|exists:users,id',
+            'amount' => 'required|numeric'
+        ]);
+        
+        Validator::extend('foo', function($attribute, $value, $parameters)
+        {
+            return $value == 'foo';
+        });
+
+        if ($validator->fails()) 
+        {
+            return response($validator->errors(), 422);
+        }
+        
+        if (User::where([['id', $request->input('user')],[ 'balance', '>=', $request->input('amount')]])
+            ->decrement('balance', $request->input('amount')))
+        {
+            return response('200 OK', 200);
+        }
+        return response('422 user don\'t have enough money', 422);
+        
+    }
 }
