@@ -16,3 +16,5 @@ Route::get('/', function () {
 });
 
 Route::get('balance/', 'UserController@showBalance');
+
+Route::post('deposit/', 'UserController@addMoney');
